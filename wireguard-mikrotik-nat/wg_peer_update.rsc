@@ -1,0 +1,30 @@
+:do {
+ :local peerpubkey "XXXXXXXXXXXX=";
+ :local baseurl "http://site.url/wgpeerX487k3H/"
+ :local lasthandshake [/interface/wireguard/peers get [find public-key=($peerpubkey)] last-handshake];
+ :local mintimeout [:tonum [:pick ($lasthandshake)  3 5 ]]
+ :if ($mintimeout > 3) do={
+ #:log info ("run script wireguard sync")
+ :do {
+   :local url  ( $baseurl . $peerpubkey . "/addr.txt" )
+   :local result [/tool fetch url=$url as-value output=user];
+   :if ($result->"status" = "finished") do={
+      #:log info ("result: " . $result->"data")
+      :local peeraddr [:toarray ( $result->"data" ) ]
+      :local pdisabled [/interface/wireguard/peers get [find public-key=($peerpubkey)] disabled];
+      :local paddress [/interface/wireguard/peers get [find public-key=($peerpubkey)] endpoint-address];
+      :local pport [/interface/wireguard/peers get [find public-key=($peerpubkey)] endpoint-port];
+      :if ( ($paddress != $peeraddr->0) || ( $pport != $peeraddr->1 ) || ($pdisabled != false)) do={
+            :log info ("change peer to " . $peeraddr->0 . ":" . $peeraddr->1)
+           /interface/wireguard/peers set [ find public-key=($peerpubkey) ] disabled=no endpoint-address=($peeraddr->0) endpoint-port=($peeraddr->1)
+      }
+    } 
+   }
+  }
+  } on-error={
+       :local pdisabled [/interface/wireguard/peers get [find public-key=($peerpubkey)] disabled];
+       :if ($pdisabled != true ) do={
+         :log info ("disable wireguard peer due error")
+         /interface/wireguard/peers set [ find public-key=($peerpubkey)  ] disabled=yes
+  }
+}
