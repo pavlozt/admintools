@@ -1,2 +1,3 @@
-# admintools
-my admin tools
+# admintools #
+
+Miscellaneous utilities and materials for system administrators.
