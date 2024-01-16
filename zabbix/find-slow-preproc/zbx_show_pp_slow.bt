@@ -1,0 +1,33 @@
+#!/usr/bin/env bpftrace
+BEGIN
+{
+        $limit = 40;
+        if ($1 > 0) {   $limit = (uint64) $1; }
+        printf("Tracing Zabbix preprocessed values with limit %d ms... Hit Ctrl-C to end.\n",$limit);
+}
+uprobe:/usr/sbin/zabbix_proxy:zbx_preprocess_item_value
+{
+        @start[tid] = nsecs;
+        @aarg[tid] = arg0
+}
+
+uretprobe:/usr/sbin/zabbix_proxy:zbx_preprocess_item_value
+/@start[tid]/
+{
+        $limit = 40;
+        if ($1 > 0) {   $limit = (uint64) $1; }
+
+        $delay = (nsecs - @start[tid]) / 1000;
+        @usecs = hist($delay);
+        if ($delay > ((uint64) $limit )) {
+           printf("delay %d, item %d \n",$delay,@aarg[tid]);
+        }
+        delete(@start[tid]);
+        delete(@aarg[tid]);
+}
+
+END
+{
+        clear(@start);
+        clear(@usecs);
+}

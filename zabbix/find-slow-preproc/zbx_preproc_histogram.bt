@@ -1,0 +1,21 @@
+#!/usr/bin/env bpftrace
+BEGIN
+{
+        printf("Making delay histogram of Zabbix preprocessors... Hit Ctrl-C to end.\n");
+}
+uprobe:/usr/sbin/zabbix_proxy:zbx_preprocess_item_value
+{
+        @start[tid] = nsecs;
+}
+
+uretprobe:/usr/sbin/zabbix_proxy:zbx_preprocess_item_value
+/@start[tid]/
+{
+        @usecs = hist((nsecs - @start[tid]) / 1000);
+        delete(@start[tid]);
+}
+
+END
+{
+        clear(@start);
+}
