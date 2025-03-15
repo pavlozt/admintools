@@ -1,0 +1,23 @@
+Datetime,Event ID,Name,Severity,Status
+2025-03-04 19:42:26,419019,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),2,PROBLEM
+2025-03-04 20:57:26,419046,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),0,OK
+2025-03-05 04:02:26,419073,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),2,PROBLEM
+2025-03-05 04:07:26,419074,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),0,OK
+2025-03-05 05:12:26,419078,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),2,PROBLEM
+2025-03-05 05:22:26,419079,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),0,OK
+2025-03-05 05:27:26,419080,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),2,PROBLEM
+2025-03-05 10:12:26,419186,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),0,OK
+2025-03-05 10:22:26,419202,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),2,PROBLEM
+2025-03-05 10:32:26,419205,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),0,OK
+2025-03-05 10:57:26,419206,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),2,PROBLEM
+2025-03-05 11:02:26,419234,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),0,OK
+2025-03-05 11:22:26,419236,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),2,PROBLEM
+2025-03-05 11:27:26,419237,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),0,OK
+2025-03-05 11:32:26,419238,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),2,PROBLEM
+2025-03-05 12:22:26,419271,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),0,OK
+2025-03-05 12:27:26,419272,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),2,PROBLEM
+2025-03-05 12:37:26,419273,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),0,OK
+2025-03-05 12:52:26,419279,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),2,PROBLEM
+2025-03-05 13:12:26,419303,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),0,OK
+2025-03-05 13:17:26,419306,SMART [nvme3]: Average disk temperature is too high (over 60°C for 5m),2,PROBLEM
+2025-03-05 13:27:26,419310,SMART [nvme3]: Average disk temperature is too high (over 62°C for 5m),0,OK
