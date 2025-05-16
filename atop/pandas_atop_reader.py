@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-pandas_atop_reader: A modular toolkit for parsing atop reports into pandas DataFrames.
+pandas_atop_reader: A toolkit for parsing atop reports into pandas DataFrames.
 Supports remote file sync, atop export, and customizable report parsing.
 """
 
@@ -18,7 +18,7 @@ def sync_remote_atop(
     rsync_options: str = "-avz"
 ) -> str:
     """
-    Sync remote atop binary files to local cache directory using SSH/SCP.
+    Sync remote atop binary files to local cache directory using Rsync over SSH.
 
     Args:
         ssh_connect_string: SSH connection string (e.g. 'user@host')
@@ -31,7 +31,7 @@ def sync_remote_atop(
     # make directory if it doesn't exist
     if not os.path.exists(local_cache_dir):
         os.makedirs(local_cache_dir)
-    return subprocess.run(f"rsync {rsync_options} {ssh_connect_string}:/var/log/atop/ {local_cache_dir}/", shell=True, check=True);
+    return subprocess.run(f"rsync {rsync_options} {ssh_connect_string}:{remote_path} {local_cache_dir}/", shell=True, check=True);
 
 # Atop Export Operations Section
 
@@ -65,7 +65,7 @@ def export_atop_remote(
     Args:
         ssh_connect_string: SSH connection target
         atop_file: Remote atop file path
-        See export_local_atop() for other arguments
+        See export_atop_local() for other arguments
 
     Returns:
         Pandas timeseries-indexed dataframe
