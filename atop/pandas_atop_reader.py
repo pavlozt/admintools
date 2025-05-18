@@ -54,7 +54,7 @@ def export_text_local(
     if kind == 'cpufreq':
         atop_run_kind = 'cpu'
     decode_cmd = f'atop -r {atop_file} -P {atop_run_kind}'
-    process = subprocess.run(decode_cmd, shell=True, capture_output=True, text=True)
+    process = subprocess.run(decode_cmd, shell=True, capture_output=True, text=True, check=True)
     output = process.stdout
     return parse_text_report(output, kind)
 
@@ -77,7 +77,7 @@ def export_text_remote(
     """
     decode_cmd = f'atop -r {atop_file} -P {kind}'
     exec_string = f'ssh {ssh_connect_string} "{decode_cmd}"'
-    process = subprocess.run(exec_string, shell=True, capture_output=True, text=True)
+    process = subprocess.run(exec_string, shell=True, capture_output=True, text=True, check=True)
     output = process.stdout
     return parse_text_report(output, kind)
 
@@ -211,9 +211,9 @@ def get_local_cache(directory: str = './.atop_cache') -> List[str]:
 
     for item in os.listdir(directory):
         item_path = os.path.join(directory, item)
-        if os.path.isfile(item_path):
+        if os.path.isfile(item_path) and item.startswith('atop'):
             file_list.append(item_path)
-
+    file_list.sort()
     return file_list
 
 # Batch Processing Section
@@ -245,6 +245,6 @@ def process_files_batch(
 
 if __name__ == '__main__':
     # Example usage
-    file_paths = get_local_cache()
-    df = process_files_batch(file_paths)
+    test_file_paths = get_local_cache()
+    df = process_files_batch(test_file_paths)
     print(df)
