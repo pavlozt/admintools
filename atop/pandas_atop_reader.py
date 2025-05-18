@@ -1,24 +1,26 @@
 #!/usr/bin/env python
 """
-pandas_atop_reader: A modular toolkit for parsing atop reports into pandas DataFrames.
+pandas_atop_reader: A toolkit for parsing atop reports into pandas DataFrames.
 Supports remote file sync, atop export, and customizable report parsing.
 """
 
-import pandas as pd
+
 from typing import Optional, List, Dict
 import subprocess
 import os
+import pandas as pd
 
 # SSH/Remote Operations Section
 
-def sync_remote_atop(
+
+def sync_remote_to_local(
     ssh_connect_string: str,
     local_cache_dir: str = '.atop_cache',
     remote_path: str = "/var/log/atop/",
     rsync_options: str = "-avz"
 ) -> str:
     """
-    Sync remote atop binary files to local cache directory using SSH/SCP.
+    Sync remote atop binary files to local cache directory using Rsync over SSH.
 
     Args:
         ssh_connect_string: SSH connection string (e.g. 'user@host')
@@ -31,11 +33,12 @@ def sync_remote_atop(
     # make directory if it doesn't exist
     if not os.path.exists(local_cache_dir):
         os.makedirs(local_cache_dir)
-    return subprocess.run(f"rsync {rsync_options} {ssh_connect_string}:/var/log/atop/ {local_cache_dir}/", shell=True, check=True);
+    return subprocess.run(f"rsync {rsync_options} {ssh_connect_string}:{remote_path} {local_cache_dir}/", shell=True, check=True);
 
 # Atop Export Operations Section
 
-def export_atop_local(
+
+def export_text_local(
     atop_file: str,
     kind: Optional[str] = 'cpufreq'
 ) -> str:
@@ -47,14 +50,16 @@ def export_atop_local(
     Returns:
         Pandas timeseries-indexed dataframe
     """
+    atop_run_kind = 'cpu'  # default
     if kind == 'cpufreq':
         atop_run_kind = 'cpu'
     decode_cmd = f'atop -r {atop_file} -P {atop_run_kind}'
     process = subprocess.run(decode_cmd, shell=True, capture_output=True, text=True)
     output = process.stdout
-    return parse_atop_report(output, kind)
+    return parse_text_report(output, kind)
 
-def export_atop_remote(
+
+def export_text_remote(
     ssh_connect_string: str,
     atop_file: str,
     kind: Optional[str] = 'cpufreq'
@@ -65,7 +70,7 @@ def export_atop_remote(
     Args:
         ssh_connect_string: SSH connection target
         atop_file: Remote atop file path
-        See export_local_atop() for other arguments
+        See export_atop_local() for other arguments
 
     Returns:
         Pandas timeseries-indexed dataframe
@@ -74,11 +79,12 @@ def export_atop_remote(
     exec_string = f'ssh {ssh_connect_string} "{decode_cmd}"'
     process = subprocess.run(exec_string, shell=True, capture_output=True, text=True)
     output = process.stdout
-    return parse_atop_report(output, kind)
+    return parse_text_report(output, kind)
 
 # Report Parsing Section
 
-def parse_atop_report(
+
+def parse_text_report(
     content: str,
     report_type: str = 'cpufreq',
     parsing_options: Optional[Dict] = None
@@ -106,6 +112,7 @@ def parse_atop_report(
         raise ValueError(f"Unsupported report type: {report_type}")
 
     return parser_map[report_type](content, parsing_options or {})
+
 
 def _parse_cpufreq_report(
     content: str,
@@ -142,7 +149,6 @@ def _parse_cpufreq_report(
             if not skip_reset:
                 current_block.append(line)
 
-
     # Prepare data structure for metrics
     records = []
     for block in blocks:
@@ -166,15 +172,16 @@ def _parse_cpufreq_report(
         timestamps = [ts for ts, _ in records]
         cpu_data = [vals for _, vals in records]
         datetime_index = pd.to_datetime(timestamps, unit='s', utc=True)
-        df = pd.DataFrame(
+        outdf = pd.DataFrame(
             cpu_data,
             index=datetime_index
         ).rename(columns=lambda x: f'cpu{x}').fillna(0).astype(int)
-        df.index.name = 'timestamp'
+        outdf.index.name = 'timestamp'
     else:
-        df = pd.DataFrame()
+        outdf = pd.DataFrame()
 
-    return df
+    return outdf
+
 
 def _parse_disk_report(
     content: str,
@@ -190,7 +197,7 @@ def _parse_disk_report(
     Returns:
         DataFrame with disk statistics
     """
-    raise(NotImplementedError)
+    raise (NotImplementedError)
 
 
 def get_local_cache(directory: str = './.atop_cache') -> List[str]:
@@ -211,6 +218,7 @@ def get_local_cache(directory: str = './.atop_cache') -> List[str]:
 
 # Batch Processing Section
 
+
 def process_files_batch(
     file_paths: List[str],
     kind: str = 'cpufreq'
@@ -228,12 +236,11 @@ def process_files_batch(
     dfs = []
 
     for file_path in file_paths:
-        df = export_atop_local(file_path, kind=kind)
-        dfs.append(df)
+        add_df = export_text_local(file_path, kind=kind)
+        dfs.append(add_df)
 
     combined_df = pd.concat(dfs, axis=0) if dfs else pd.DataFrame()
     return combined_df
-
 
 
 if __name__ == '__main__':
